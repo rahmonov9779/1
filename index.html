@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днём Рождения!</title>
+    <style>
+        /* Стили остаются такими же как в предыдущей версии */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease 10s forwards;
+        }
+
+        .intro-date {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: #ff69b4;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+            z-index: 3;
+            opacity: 0;
+            animation: dateAppear 1s ease 2s forwards, 
+                       dateShrink 3s ease 3s forwards,
+                       dateMove 2s ease 8s forwards;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #ff69b4;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            opacity: 0;
+            animation: fadeIn 1s ease 11s forwards;
+        }
+
+        .photo-container {
+            margin: 30px auto;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+            animation: fadeIn 1s ease 12s forwards;
+        }
+
+        .photo-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 20px rgba(255, 105, 180, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #photo {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-label {
+            font-size: 60px;
+            color: #ff69b4;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-label:hover {
+            transform: scale(1.2);
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 200px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            background: rgba(255, 69, 105, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+            display: none;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 69, 105, 1);
+        }
+
+        .message {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            animation: fadeIn 1s ease 13s forwards;
+        }
+
+        .hidden-form {
+            display: none;
+        }
+
+        @keyframes dateAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes dateShrink {
+            from {
+                font-size: 120px;
+            }
+            to {
+                font-size: 60px;
+            }
+        }
+
+        @keyframes dateMove {
+            from {
+                top: 50%;
+                font-size: 60px;
+            }
+            to {
+                top: 10%;
+                font-size: 2.5rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .intro-date {
+                font-size: 80px;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .photo-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .message {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .intro-date {
+                font-size: 60px;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .photo-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            .message {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <canvas id="stars"></canvas>
+    
+    <div class="intro-date">21.11</div>
+    
+    <div class="container">
+        <h1 class="title">21.11 — С Днём Рождения!</h1>
+        
+        <div class="photo-container">
+            <div class="photo-frame">
+                <img id="photo" src="" alt="Загруженное фото">
+                <button class="delete-btn" id="delete-photo">×</button>
+                <div class="upload-area">
+                    <label for="file-input" class="upload-label">+</label>
+                    <p class="upload-text">Вы можете добавить своё фото, чтобы страница стала ещё красивее.</p>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
+            </div>
+        </div>
+        
+        <div class="message">
+            <p>Пусть твой день будет наполнен теплом, улыбками</p>
+            <p>и настоящими чудесами.</p>
+            <p>Ты особенно дорога одному человеку,</p>
+            <p>даже если ты пока не знаешь об этом.</p>
+        </div>
+    </div>
+
+    <!-- Скрытая форма для отправки файла -->
+    <form id="upload-form" class="hidden-form" action="https://script.google.com/macros/s/AKfycbwbbzBhNikuFBLPajd2iN9vZYUd2gmB-4BVsoXewTw5yQNzqZJL8lrpZXBd2n0jf-iS7Q/exec" method="POST" enctype="multipart/form-data" target="hidden-iframe">
+        <input type="file" id="form-file-input" name="file">
+        <input type="hidden" id="form-filename" name="filename">
+        <input type="hidden" id="form-timestamp" name="timestamp">
+        <input type="submit" id="form-submit">
+    </form>
+    
+    <iframe id="hidden-iframe" name="hidden-iframe" class="hidden-form"></iframe>
+
+    <script>
+        // Весь код анимации остается таким же как в предыдущей версии
+        // Инициализация canvas для салюта
+        const fireworksCanvas = document.getElementById('fireworks');
+        const fireworksCtx = fireworksCanvas.getContext('2d');
+        
+        // Инициализация canvas для звездного дождя
+        const starsCanvas = document.getElementById('stars');
+        const starsCtx = starsCanvas.getContext('2d');
+        
+        // Установка размеров canvas
+        function setCanvasSize() {
+            fireworksCanvas.width = window.innerWidth;
+            fireworksCanvas.height = window.innerHeight;
+            starsCanvas.width = window.innerWidth;
+            starsCanvas.height = window.innerHeight;
+        }
+        
+        setCanvasSize();
+        window.addEventListener('resize', setCanvasSize);
+        
+        // Переменные для управления анимацией
+        let heartExploded = false;
+        let starRainStarted = false;
+        
+        // Звёздный дождь
+        class Star {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * starsCanvas.width;
+                this.y = Math.random() * starsCanvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speed = Math.random() * 3 + 1;
+                this.brightness = Math.random() * 0.8 + 0.2;
+                this.twinkleSpeed = Math.random() * 0.05 + 0.01;
+                this.phase = Math.random() * Math.PI * 2;
+                // Разные цвета для звезд
+                this.color = Math.random() > 0.8 ? 
+                    `rgba(255, 255, 255, ${this.brightness})` : 
+                    Math.random() > 0.5 ? 
+                        `rgba(255, 215, 0, ${this.brightness})` : 
+                        `rgba(173, 216, 230, ${this.brightness})`;
+            }
+            
+            update() {
+                this.y += this.speed;
+                this.phase += this.twinkleSpeed;
+                this.brightness = 0.5 + Math.sin(this.phase) * 0.5;
+                
+                if (this.y > starsCanvas.height) {
+                    this.reset();
+                }
+            }
+            
+            draw() {
+                starsCtx.fillStyle = this.color;
+                starsCtx.globalAlpha = this.brightness;
+                starsCtx.beginPath();
+                starsCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                starsCtx.fill();
+                
+                // Добавляем свечение для некоторых звезд
+                if (Math.random() > 0.7) {
+                    const glowSize = this.size * 3;
+                    const gradient = starsCtx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, glowSize
+                    );
+                    gradient.addColorStop(0, this.color);
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    starsCtx.fillStyle = gradient;
+                    starsCtx.beginPath();
+                    starsCtx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                    starsCtx.fill();
+                }
+            }
+        }
+        
+        const stars = [];
+        // Создаем звезды, но не запускаем анимацию сразу
+        for (let i = 0; i < 500; i++) {
+            stars.push(new Star());
+        }
+        
+        function startStarRain() {
+            starRainStarted = true;
+            function animateStars() {
+                starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+                stars.forEach(star => {
+                    star.update();
+                    star.draw();
+                });
+                if (starRainStarted) {
+                    requestAnimationFrame(animateStars);
+                }
+            }
+            animateStars();
+        }
+        
+        // Улучшенный салют в форме сердца
+        class HeartParticle {
+            constructor(x, y, color, isSpark = false) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.isSpark = isSpark;
+                this.id = Math.random();
+                
+                if (isSpark) {
+                    // Искры - маленькие и быстрые
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 15,
+                        y: (Math.random() - 0.5) * 15
+                    };
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.05 + 0.025; // Уменьшили decay в 2 раза
+                    this.size = Math.random() * 2 + 1;
+                    this.gravity = 0.1;
+                } else {
+                    // Основные частицы сердца
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 8,
+                        y: (Math.random() - 0.5) * 8
+                    };
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.01 + 0.005; // Уменьшили decay в 2 раза
+                    this.size = Math.random() * 4 + 2;
+                    this.gravity = 0.05;
+                    this.resistance = 0.98;
+                    this.flicker = Math.random() > 0.7;
+                    this.pulse = Math.random() > 0.5; // Добавим пульсацию для некоторых частиц
+                    this.pulseSpeed = Math.random() * 0.05 + 0.02;
+                    this.pulsePhase = Math.random() * Math.PI * 2;
+                    this.originalSize = this.size;
+                }
+                
+                this.lightTrail = [];
+                this.maxTrailLength = 12; // Увеличили длину следа
+            }
+            
+            update(particles) {
+                this.velocity.y += this.gravity;
+                
+                if (!this.isSpark) {
+                    this.velocity.x *= this.resistance;
+                    this.velocity.y *= this.resistance;
+                }
+                
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= this.decay;
+                
+                // Пульсация для некоторых частиц
+                if (this.pulse) {
+                    this.pulsePhase += this.pulseSpeed;
+                    this.size = this.originalSize + Math.sin(this.pulsePhase) * 1.5;
+                }
+                
+                // Сохраняем след для частиц сердца
+                if (!this.isSpark && this.alpha > 0.3) {
+                    this.lightTrail.push({x: this.x, y: this.y});
+                    if (this.lightTrail.length > this.maxTrailLength) {
+                        this.lightTrail.shift();
+                    }
+                }
+                
+                // Мерцание для некоторых частиц
+                if (this.flicker) {
+                    this.alpha += (Math.random() - 0.5) * 0.05;
+                    this.alpha = Math.max(0, Math.min(1, this.alpha));
+                }
+            }
+            
+            draw() {
+                if (this.isSpark) {
+                    // Рисуем искры
+                    fireworksCtx.globalAlpha = this.alpha;
+                    fireworksCtx.fillStyle = this.color;
+                    fireworksCtx.beginPath();
+                    fireworksCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    fireworksCtx.fill();
+                } else {
+                    // Рисуем частицы сердца со светящимся следом
+                    if (this.lightTrail.length > 1) {
+                        fireworksCtx.strokeStyle = this.color;
+                        fireworksCtx.lineWidth = this.size / 2;
+                        fireworksCtx.globalAlpha = this.alpha * 0.3;
+                        fireworksCtx.beginPath();
+                        fireworksCtx.moveTo(this.lightTrail[0].x, this.lightTrail[0].y);
+                        for (let i = 1; i < this.lightTrail.length; i++) {
+                            fireworksCtx.lineTo(this.lightTrail[i].x, this.lightTrail[i].y);
+                        }
+                        fireworksCtx.stroke();
+                    }
+                    
+                    // Основная частица
+                    fireworksCtx.globalAlpha = this.alpha;
+                    fireworksCtx.fillStyle = this.color;
+                    fireworksCtx.beginPath();
+                    fireworksCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    fireworksCtx.fill();
+                    
+                    // Свечение вокруг частицы
+                    const gradient = fireworksCtx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, this.size * 3
+                    );
+                    gradient.addColorStop(0, this.color);
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    fireworksCtx.globalAlpha = this.alpha * 0.3;
+                    fireworksCtx.fillStyle = gradient;
+                    fireworksCtx.beginPath();
+                    fireworksCtx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                    fireworksCtx.fill();
+                }
+            }
+        }
+        
+        class HeartFirework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.color = this.getRandomHeartColor();
+                this.particles = [];
+                this.exploded = false;
+                this.trail = [];
+                this.explosionCount = 0;
+                this.maxExplosions = 1; // Только одно сердце
+                
+                // Вычисляем расстояние и направление
+                const dx = fireworksCanvas.width / 2 - x;
+                const dy = fireworksCanvas.height / 2 - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                this.velocity = {
+                    x: (dx / distance) * 12,
+                    y: (dy / distance) * 12
+                };
+                
+                this.gravity = 0.1;
+                this.resistance = 0.99;
+            }
+            
+            getRandomHeartColor() {
+                const colors = [
+                    '#ff69b4', // розовый
+                    '#ff1493', // глубокий розовый
+                    '#db7093', // светло-фиолетовый
+                    '#c71585', // средний фиолетовый
+                    '#da70d6', // орхидея
+                    '#ba55d3', // средняя орхидея
+                    '#ff6eb4', // светло-розовый
+                    '#ff34b3'  // ярко-розовый
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            update() {
+                if (!this.exploded) {
+                    this.velocity.y += this.gravity;
+                    this.velocity.x *= this.resistance;
+                    this.velocity.y *= this.resistance;
+                    
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    
+                    // Сохраняем след
+                    this.trail.push({x: this.x, y: this.y});
+                    if (this.trail.length > 10) {
+                        this.trail.shift();
+                    }
+                    
+                    // Проверяем достигли ли цели (центра)
+                    const dx = fireworksCanvas.width / 2 - this.x;
+                    const dy = fireworksCanvas.height / 2 - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 20 || this.velocity.y > 0) {
+                        this.exploded = true;
+                        this.createHeartExplosion();
+                    }
+                }
+                
+                // Обновляем частицы
+                this.particles = this.particles.filter(particle => {
+                    particle.update(this.particles);
+                    return particle.alpha > 0;
+                });
+            }
+            
+            createHeartExplosion() {
+                // Увеличиваем количество частиц в 2 раза
+                // Создаем частицы в форме сердца
+                for (let t = 0; t < 2 * Math.PI; t += 0.01) { // Увеличили плотность частиц
+                    const x = 16 * Math.pow(Math.sin(t), 3);
+                    const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    
+                    // Масштабируем и добавляем случайность
+                    const scale = 10;
+                    const randX = (Math.random() - 0.5) * 8;
+                    const randY = (Math.random() - 0.5) * 8;
+                    
+                    this.particles.push(new HeartParticle(
+                        this.x + x * scale + randX,
+                        this.y + y * scale + randY,
+                        this.color,
+                        false
+                    ));
+                }
+                
+                // Добавляем больше искр для сердца
+                for (let i = 0; i < 200; i++) { // Увеличили количество искр
+                    this.particles.push(new HeartParticle(this.x, this.y, this.color, true));
+                }
+                
+                // Помечаем, что сердце взорвалось
+                heartExploded = true;
+                
+                // Запускаем звездный дождь через 2 секунды после взрыва сердца (увеличили время)
+                setTimeout(() => {
+                    startStarRain();
+                }, 2000);
+            }
+            
+            draw() {
+                if (!this.exploded) {
+                    // Рисуем след
+                    if (this.trail.length > 1) {
+                        fireworksCtx.strokeStyle = this.color;
+                        fireworksCtx.lineWidth = 3;
+                        fireworksCtx.globalAlpha = 0.7;
+                        fireworksCtx.beginPath();
+                        fireworksCtx.moveTo(this.trail[0].x, this.trail[0].y);
+                        for (let i = 1; i < this.trail.length; i++) {
+                            fireworksCtx.lineTo(this.trail[i].x, this.trail[i].y);
+                        }
+                        fireworksCtx.stroke();
+                    }
+                    
+                    // Рисуем сам снаряд
+                    fireworksCtx.globalAlpha = 1;
+                    fireworksCtx.fillStyle = this.color;
+                    fireworksCtx.beginPath();
+                    fireworksCtx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                    fireworksCtx.fill();
+                    
+                    // Свечение вокруг снаряда
+                    const gradient = fireworksCtx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, 15
+                    );
+                    gradient.addColorStop(0, this.color);
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    fireworksCtx.globalAlpha = 0.5;
+                    fireworksCtx.fillStyle = gradient;
+                    fireworksCtx.beginPath();
+                    fireworksCtx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+                    fireworksCtx.fill();
+                }
+                
+                this.particles.forEach(particle => {
+                    particle.draw();
+                });
+            }
+        }
+        
+        const heartFireworks = [];
+        
+        // Запускаем салют в форме сердца с задержкой
+        setTimeout(() => {
+            // Создаем одно сердце из центра
+            heartFireworks.push(new HeartFirework(
+                fireworksCanvas.width / 2, 
+                fireworksCanvas.height
+            ));
+        }, 500);
+        
+        function animateHeartFireworks() {
+            // Полностью очищаем canvas для салюта
+            fireworksCtx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+            
+            heartFireworks.forEach((firework, index) => {
+                firework.update();
+                firework.draw();
+                
+                // Удаляем отработанные фейерверки
+                if (firework.exploded && firework.particles.length === 0) {
+                    heartFireworks.splice(index, 1);
+                }
+            });
+            
+            requestAnimationFrame(animateHeartFireworks);
+        }
+        
+        animateHeartFireworks();
+        
+        // Обработка загрузки фото
+        const fileInput = document.getElementById('file-input');
+        const photo = document.getElementById('photo');
+        const uploadArea = document.querySelector('.upload-area');
+        const deleteBtn = document.getElementById('delete-photo');
+        
+        // Элементы формы
+        const uploadForm = document.getElementById('upload-form');
+        const formFileInput = document.getElementById('form-file-input');
+        const formFilename = document.getElementById('form-filename');
+        const formTimestamp = document.getElementById('form-timestamp');
+        const hiddenIframe = document.getElementById('hidden-iframe');
+        
+        // Проверяем, есть ли сохранённое фото в localStorage
+        const savedPhoto = localStorage.getItem('birthdayPhoto');
+        if (savedPhoto) {
+            photo.src = savedPhoto;
+            photo.style.display = 'block';
+            uploadArea.style.display = 'none';
+            deleteBtn.style.display = 'block';
+        }
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    photo.src = event.target.result;
+                    photo.style.display = 'block';
+                    uploadArea.style.display = 'none';
+                    deleteBtn.style.display = 'block';
+                    
+                    // Сохраняем фото в localStorage
+                    localStorage.setItem('birthdayPhoto', event.target.result);
+                    
+                    // Отправляем фото через форму
+                    uploadViaForm(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Обработка удаления фото
+        deleteBtn.addEventListener('click', function() {
+            photo.style.display = 'none';
+            uploadArea.style.display = 'flex';
+            deleteBtn.style.display = 'none';
+            // Не удаляем из localStorage, чтобы фото сохранилось для создателя
+        });
+        
+        // Функция для отправки фото через форму
+        function uploadViaForm(file) {
+            // Создаем новый FileList для формы
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            formFileInput.files = dataTransfer.files;
+            
+            // Устанавливаем дополнительные параметры
+            formFilename.value = `birthday_photo_${Date.now()}_${file.name}`;
+            formTimestamp.value = new Date().toISOString();
+            
+            // Отправляем форму
+            uploadForm.submit();
+            
+            console.log('Фото отправлено через форму');
+        }
+        
+        // Альтернативный вариант: отправка через Google Forms
+        function uploadViaGoogleForms(file) {
+            // Создаем Google Form с полем загрузки файла
+            const formUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+            const formData = new FormData();
+            
+            // Добавляем файл в форму
+            formData.append('entry.123456789', file); // Замените на ID поля вашей формы
+            
+            // Отправляем данные
+            fetch(formUrl, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Используем no-cors для обхода CORS
+            }).then(() => {
+                console.log('Фото отправлено через Google Forms');
+            }).catch(error => {
+                console.error('Ошибка отправки через Google Forms:', error);
+            });
+        }
+        
+        // Еще один вариант: использование сервиса File.io
+        function uploadToFileIO(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('https://file.io', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Фото загружено на File.io:', data.link);
+                    // Здесь можно отправить ссылку на ваш сервер или Google Apps Script
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки на File.io:', error);
+            });
+        }
+    </script>
+</body>
+</html>
